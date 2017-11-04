@@ -1,2 +1,7 @@
 /target/
 **/*.rs.bk
+
+# editor files
+.idea
+*.swp
+*.iml

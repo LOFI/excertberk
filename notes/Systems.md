@@ -40,3 +40,27 @@ some min/max.
 * Hump
 * Ramp (various angles/sizes)
 * Shelf/Plateau (raised, but level)
+
+## Player States
+
+Not sure these states are exhaustive, or relevant, but here's a list of 
+things a rider could be doing at any given time:
+
+* Waiting for the race to start
+* Riding
+* Catching air
+* Scrambling back to bike
+* Tumbling
+* Riding off after the race has finished
+
+When it comes to CPU riders, consider the various "think" outcomes:
+
+* avoid terrain
+* avoid bike
+* adjust angle 
+* ride straight on
+* cut off rider approaching from behind
+
+The decision making process could be tuned using a couple numeric weights
+representing how aggressive or passive the rider is meant to be. Also some
+weight factor to adjust how quick they make a decision or not.

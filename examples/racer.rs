@@ -11,6 +11,7 @@ fn main() {
 
     let mut world = World::new();
     world.register::<Bike>();
+    world.register::<ComputerRider>();
 
     // An entity may or may not contain some component.
     for i in 0..3 {
@@ -18,9 +19,10 @@ fn main() {
             .create_entity()
             .with(Bike {
                 lane: i,
-                distance: 0,
+                distance: 0.0,
+                active_state: RiderState::Riding,
             })
-            .with(ComputerRider { view_distance: 10 })
+            .with(ComputerRider { view_distance: 10.0 })
             .build();
     }
 

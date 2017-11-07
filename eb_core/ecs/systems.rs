@@ -1,4 +1,4 @@
-use specs::{System, SystemData, ReadStorage, WriteStorage, Join};
+use specs::{System, SystemData, Entities, ReadStorage, WriteStorage, Join};
 use super::components::*;
 
 pub struct ComputerRiderThink;
@@ -25,35 +25,33 @@ pub struct Tile {
 }
 
 pub struct Track {
-    tiles: Vec<Tile>,
+    tiles: Vec<Vec<Tile>>,
 }
 
 /// I guess this will return a 2d vec, one tile slice per lane, using some
 /// window to limit the tile count.
-fn upcoming_tiles(track: &Track, from: f32, to: f32) -> Vec<&[Tile]> {
-    unimplemented!();
+fn upcoming_tiles(track: &Track, from: f32, to: f32) -> &[Vec<Tile>] {
+    track.tiles.as_slice()
 }
 
 impl<'a> System<'a> for ComputerRiderThink {
-    type SystemData = (WriteStorage<'a, Bike>, ReadStorage<'a, ComputerRider>);
+    type SystemData = (WriteStorage<'a, Bike>, ReadStorage<'a, ComputerRider>, ReadStorage<'a, Bike>);
 
-    fn run(&mut self, (mut bike, brain): Self::SystemData) {
+    fn run(&mut self, (mut wbikes, brains, rbikes): Self::SystemData) {
         // FIXME: need access to the other bike positions, and terrain info.
 
-        // Need to look at the forward terrain, from the current bike position
-        // to the view distance of the brain.
-        // Also check for nearby bikes that could be rear-ended, or cut off.
+        let track = Track { tiles: vec![] }; // FIXME: bind Track to ECS as resource
 
-        let track = Track { tiles: vec![] };
-        for (b, brain) in (&mut bike, &brain).join() {
+        let others = rbikes.join().collect::<Vec<&Bike>>();
+
+        for (bike, brain) in (&mut wbikes, &brains).join() {
             // ... think about what you'll do
-
-            match b.active_state {
+            match bike.active_state {
                 RiderState::Riding => {
                     let tiles_by_lane =
-                        upcoming_tiles(&track, b.distance, b.distance + brain.view_distance);
+                        upcoming_tiles(&track, bike.distance, bike.distance + brain.view_distance);
                 }
-                _ => ()
+                _ => (),
             };
         }
     }

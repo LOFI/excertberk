@@ -42,20 +42,34 @@ impl MainState {
 }
 
 impl event::EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+        let window = ctx.gfx_context.get_window();
+        let (width, height) = window.size();
         let float_duration = dt.as_secs() as f64 + dt.subsec_nanos() as f64 * 1e-9;
 
         if self.input_state.up {
-            self.y = self.y - (SPEED * float_duration as f32);
+            let temp_up = self.y - (SPEED * float_duration as f32);
+            if temp_up - (SIZE / 2.) > 0. {
+                self.y = temp_up;
+            }
         }
         if self.input_state.down {
-            self.y = self.y + (SPEED * float_duration as f32);
+            let temp_down = self.y + (SPEED * float_duration as f32);
+            if temp_down + (SIZE / 2.) < (height as f32) {
+                self.y = temp_down;
+            }
         }
         if self.input_state.left {
-            self.x = self.x - (SPEED * float_duration as f32);
+            let temp_left = self.x - (SPEED * float_duration as f32);
+            if temp_left - (SIZE / 2.) > 0. {
+                self.x = temp_left;
+            }
         }
         if self.input_state.right {
-            self.x = self.x + (SPEED * float_duration as f32);
+            let temp_right = self.x + (SPEED * float_duration as f32);
+            if temp_right + (SIZE / 2.) < (width as f32) {
+                self.x = temp_right;
+            }
         }
 
         Ok(())

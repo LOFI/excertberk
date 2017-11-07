@@ -20,6 +20,7 @@ impl Component for HumanRider {
 }
 
 
+#[derive(Clone, Debug)]
 pub enum RiderState {
     Riding,
     Tumbling,
@@ -28,13 +29,18 @@ pub enum RiderState {
 
 /// This is a bike. Unsure if it also covers the rider (which may be a
 /// separate entity).
+#[derive(Clone, Debug)]
 pub struct Bike {
+    /// the id for this bike
+    pub id: u8,
     /// which lane is the bike in
     pub lane: u8,
     /// distance along the track
     pub distance: f32,
     /// what is the rider up to?
     pub active_state: RiderState,
+    /// it's the rotation of the bike (rear wheel is the pivot point)
+    pub angle: f32,
 }
 
 impl Component for Bike {

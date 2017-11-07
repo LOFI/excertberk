@@ -18,9 +18,11 @@ fn main() {
         world
             .create_entity()
             .with(Bike {
+                id: i,
                 lane: i,
                 distance: 0.0,
                 active_state: RiderState::Riding,
+                angle: 0.0,
             })
             .with(ComputerRider { view_distance: 10.0 })
             .build();

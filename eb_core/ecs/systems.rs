@@ -35,16 +35,18 @@ fn upcoming_tiles(track: &Track, from: f32, to: f32) -> &[Vec<Tile>] {
 }
 
 impl<'a> System<'a> for ComputerRiderThink {
-    type SystemData = (WriteStorage<'a, Bike>, ReadStorage<'a, ComputerRider>, ReadStorage<'a, Bike>);
+    type SystemData = (WriteStorage<'a, Bike>, ReadStorage<'a, ComputerRider>);
 
-    fn run(&mut self, (mut wbikes, brains, rbikes): Self::SystemData) {
+    fn run(&mut self, (mut bikes, brains): Self::SystemData) {
         // FIXME: need access to the other bike positions, and terrain info.
 
-        let track = Track { tiles: vec![] }; // FIXME: bind Track to ECS as resource
+        let track = Track { tiles: vec![] };
 
-        let others = rbikes.join().collect::<Vec<&Bike>>();
+        // Snapshotting the bike data so we can refer to it as we visit each one.
+        // Each bike will need to know where other nearby bikes are before deciding what to do.
+        let others = (&bikes).join().map(|x| x.clone()).collect::<Vec<Bike>>();
 
-        for (bike, brain) in (&mut wbikes, &brains).join() {
+        for (bike, brain) in (&mut bikes, &brains).join() {
             // ... think about what you'll do
             match bike.active_state {
                 RiderState::Riding => {
@@ -54,5 +56,7 @@ impl<'a> System<'a> for ComputerRiderThink {
                 _ => (),
             };
         }
+
+
     }
 }

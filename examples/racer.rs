@@ -3,6 +3,7 @@ extern crate eb_core;
 use eb_core::ecs::components::*;
 use eb_core::ecs::systems::*;
 use eb_core::{World, DispatcherBuilder};
+use eb_core::types::{Track, DeltaTime};
 
 fn main() {
     // The `World` is our
@@ -12,6 +13,8 @@ fn main() {
     let mut world = World::new();
     world.register::<Bike>();
     world.register::<ComputerRider>();
+    world.add_resource(Track { tiles: vec![] });
+    world.add_resource(DeltaTime(0.0));
 
     // An entity may or may not contain some component.
     for i in 0..3 {

@@ -4,7 +4,7 @@ use ggez::conf;
 use ggez::event;
 use ggez::{GameResult, Context};
 use ggez::graphics;
-use ggez::graphics::{Color, DrawMode, Point};
+use ggez::graphics::{DrawMode, Point};
 use std::time::Duration;
 
 const SPEED: f32 = 250.0;
@@ -15,24 +15,6 @@ struct InputState {
     down: bool,
     left: bool,
     right: bool,
-}
-
-impl InputState {
-    fn new() -> InputState {
-        return InputState {
-                   up: false,
-                   down: false,
-                   left: false,
-                   right: false,
-               };
-    }
-
-    fn reset(&mut self) {
-        self.up = false;
-        self.down = false;
-        self.left = false;
-        self.right = false;
-    }
 }
 
 struct MainState {
@@ -48,14 +30,19 @@ impl MainState {
         let s = MainState {
             x: width as f32 * 0.5,
             y: height as f32 * 0.5,
-            input_state: InputState::new(),
+            input_state: InputState {
+                up: false,
+                down: false,
+                left: false,
+                right: false,
+            },
         };
         Ok(s)
     }
 }
 
 impl event::EventHandler for MainState {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, _ctx: &mut Context, dt: Duration) -> GameResult<()> {
         let float_duration = dt.as_secs() as f64 + dt.subsec_nanos() as f64 * 1e-9;
 
         if self.input_state.up {
@@ -70,7 +57,6 @@ impl event::EventHandler for MainState {
         if self.input_state.right {
             self.x = self.x + (SPEED * float_duration as f32);
         }
-        self.input_state.reset();
 
         Ok(())
     }
@@ -89,18 +75,23 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: event::Keycode, keymod: event::Mod, repeat: bool) {
+    fn key_down_event(&mut self, keycode: event::Keycode, _keymod: event::Mod, _repeat: bool) {
         match keycode {
             event::Keycode::Up => self.input_state.up = true,
             event::Keycode::Down => self.input_state.down = true,
             event::Keycode::Left => self.input_state.left = true,
             event::Keycode::Right => self.input_state.right = true,
-            _ => {
-                println!("Key pressed: {:?}, modifier {:?}, repeat: {}",
-                         keycode,
-                         keymod,
-                         repeat);
-            }
+            _ => {}
+        }
+    }
+
+    fn key_up_event(&mut self, keycode: event::Keycode, _keymod: event::Mod, _repeat: bool) {
+        match keycode {
+            event::Keycode::Up => self.input_state.up = false,
+            event::Keycode::Down => self.input_state.down = false,
+            event::Keycode::Left => self.input_state.left = false,
+            event::Keycode::Right => self.input_state.right = false,
+            _ => {}
         }
     }
 }

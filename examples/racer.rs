@@ -6,9 +6,6 @@ use eb_core::{World, DispatcherBuilder};
 use eb_core::types::{Track, DeltaTime};
 
 fn main() {
-    // The `World` is our
-    // container for components
-    // and other resources.
 
     let mut world = World::new();
     world.register::<Bike>();
@@ -31,15 +28,9 @@ fn main() {
             .build();
     }
 
-    // This builds a dispatcher.
-    // The third parameter of `add` specifies
-    // logical dependencies on other systems.
-    // Since we only have one, we don't depend on anything.
-    // See the `full` example for dependencies.
     let mut dispatcher = DispatcherBuilder::new()
         .add(ComputerRiderThink, "thinker", &[])
         .build();
 
-    // This dispatches all the systems in parallel (but blocking).
     dispatcher.dispatch(&mut world.res);
 }

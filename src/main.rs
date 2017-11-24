@@ -4,7 +4,7 @@ use ggez::conf;
 use ggez::event;
 use ggez::{GameResult, Context};
 use ggez::graphics;
-use ggez::graphics::{Color, DrawMode, Point};
+use ggez::graphics::{DrawMode, Point};
 use std::time::Duration;
 
 struct MainState {
@@ -12,7 +12,7 @@ struct MainState {
 }
 
 impl MainState {
-    fn new(ctx: &mut Context) -> GameResult<MainState> {
+    fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let s = MainState { pos_x: 0.0 };
         Ok(s)
     }
@@ -41,9 +41,10 @@ impl event::EventHandler for MainState {
     }
 }
 
-pub fn main() {
+fn main() {
     let c = conf::Conf::new();
     let ctx = &mut Context::load_from_conf("super_simple", "ggez", c).unwrap();
     let state = &mut MainState::new(ctx).unwrap();
     event::run(ctx, state).unwrap();
 }
+

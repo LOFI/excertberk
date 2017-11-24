@@ -13,7 +13,6 @@ fn main() {
     world.add_resource(Track { tiles: vec![] });
     world.add_resource(DeltaTime(0.0));
 
-    // An entity may or may not contain some component.
     for i in 0..3 {
         world
             .create_entity()

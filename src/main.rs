@@ -47,4 +47,3 @@ fn main() {
     let state = &mut MainState::new(ctx).unwrap();
     event::run(ctx, state).unwrap();
 }
-

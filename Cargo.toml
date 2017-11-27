@@ -5,3 +5,13 @@ authors = ["Owen Nelson <onelson@gmail.com>"]
 
 [dependencies]
 ggez = "0.3.*"
+specs = "0.10.*"
+
+
+[[bin]]
+name = "excertberk"
+path = "src/main.rs"
+
+[lib]
+name = "eb_core"
+path = "eb_core/lib.rs"

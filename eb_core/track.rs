@@ -96,6 +96,11 @@ fn gid_to_rect(
 mod tests {
     use super::*;
 
+    #[test]
+    fn test_gid_to_rect() {
+        unimplemented!("todo");
+    }
+
     // I probably don't need these divmod tests, but it is very late...
     #[test]
     fn test_div_mod_3_2() {

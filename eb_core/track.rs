@@ -34,8 +34,7 @@ pub struct ObjectLayerData {
 
 
 fn div_mod(n: u64, div: u64) -> (u64, u64) {
-    let times = n / div;
-    (times, n - div * times)
+    (n / div, n % div)
 }
 
 

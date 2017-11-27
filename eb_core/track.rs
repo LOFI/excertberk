@@ -9,8 +9,8 @@ pub struct Image;
 pub struct Object;
 
 pub struct Track {
-    tile_width: u64,
-    tile_height: u64,
+    tile_width: u32,
+    tile_height: u32,
     tile_layer: TileLayerData,
     image: Image,
 }
@@ -19,21 +19,21 @@ pub struct Track {
 #[derive(Debug, Deserialize)]
 pub struct TileLayerData {
     pub name: String,
-    pub height: u64,
-    pub width: u64,
-    pub data: Vec<u64>,
+    pub height: u32,
+    pub width: u32,
+    pub data: Vec<u32>,
 }
 
 
 pub struct ObjectLayerData {
     pub name: String,
-    pub height: u64,
-    pub width: u64,
+    pub height: u32,
+    pub width: u32,
     pub objects: Vec<Object>,
 }
 
 
-fn div_mod(n: u64, div: u64) -> (u64, u64) {
+fn div_mod(n: u32, div: u32) -> (u32, u32) {
     (n / div, n % div)
 }
 
@@ -45,8 +45,8 @@ impl Track {
 
         let obj: Value = serde_json::from_reader(reader).expect("parse json");
 
-        let tile_height = obj["tileheight"].as_u64().unwrap();
-        let tile_width = obj["tilewidth"].as_u64().unwrap();
+        let tile_width = obj["tilewidth"].as_u64().unwrap() as u32;
+        let tile_height = obj["tileheight"].as_u64().unwrap() as u32;
 
         let layer: TileLayerData = serde_json::from_value(obj["layers"][0].clone()).unwrap();
 
@@ -70,11 +70,11 @@ impl Track {
 /// The image size is therefore:
 ///   `(tileset_width * tile_width) * (tileset_height * tile_height)`
 fn gid_to_rect(
-    gid: u64,
-    tile_width: u64,
-    tile_height: u64,
-    tileset_width: u64,
-    tileset_height: u64,
+    gid: u32,
+    tile_width: u32,
+    tile_height: u32,
+    tileset_width: u32,
+    tileset_height: u32,
 ) -> Rect {
     let (row, col) = div_mod(gid, tileset_width);
 

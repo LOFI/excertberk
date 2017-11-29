@@ -69,6 +69,7 @@ impl Track {
 /// pixels) that make up the entire image.
 /// The image size is therefore:
 ///   `(tileset_width * tile_width) * (tileset_height * tile_height)`
+/// Panics when gid is out of bounds.
 fn gid_to_rect(
     gid: u32,
     tile_width: u32,
@@ -77,12 +78,10 @@ fn gid_to_rect(
     tileset_height: u32,
 ) -> Rect {
     let (row, col) = div_mod(gid, tileset_width);
-
     assert!(
         row < tileset_height,
         "gid bounds check failed, row too large."
     );
-
     Rect::new(
         (col * tile_width) as f32,
         (row * tile_height) as f32,
@@ -96,8 +95,54 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_gid_to_rect() {
-        unimplemented!("todo");
+    fn test_gid_0_to_rect() {
+        assert_eq!(gid_to_rect(0, 16, 16, 3, 3), Rect::new(0., 0., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_1_to_rect() {
+        assert_eq!(gid_to_rect(1, 16, 16, 3, 3), Rect::new(16., 0., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_2_to_rect() {
+        assert_eq!(gid_to_rect(2, 16, 16, 3, 3), Rect::new(32., 0., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_3_to_rect() {
+        assert_eq!(gid_to_rect(3, 16, 16, 3, 3), Rect::new(0., 16., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_4_to_rect() {
+        assert_eq!(gid_to_rect(4, 16, 16, 3, 3), Rect::new(16., 16., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_5_to_rect() {
+        assert_eq!(gid_to_rect(5, 16, 16, 3, 3), Rect::new(32., 16., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_6_to_rect() {
+        assert_eq!(gid_to_rect(6, 16, 16, 3, 3), Rect::new(0., 32., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_7_to_rect() {
+        assert_eq!(gid_to_rect(7, 16, 16, 3, 3), Rect::new(16., 32., 16., 16.));
+    }
+
+    #[test]
+    fn test_gid_8_to_rect() {
+        assert_eq!(gid_to_rect(8, 16, 16, 3, 3), Rect::new(32., 32., 16., 16.));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_out_of_bounds_gid() {
+        gid_to_rect(9, 16, 16, 3, 3);
     }
 
     // I probably don't need these divmod tests, but it is very late...

@@ -64,7 +64,8 @@ impl Track {
 }
 
 
-/// Eh, this will position a rect using the bottom left corner instead of the center).
+/// Eh, this will position a rect using the bottom left corner
+/// instead of the center).
 fn place_rect(x: f32, y: f32, w: f32, h: f32) -> Rect {
     Rect::new(x + (w / 2.), y + (h / 2.), w, h)
 }

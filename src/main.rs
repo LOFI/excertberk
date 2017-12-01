@@ -4,8 +4,7 @@ use ggez::conf;
 use ggez::event;
 use ggez::{GameResult, Context};
 use ggez::graphics;
-use ggez::graphics::{DrawMode, Point};
-use std::time::Duration;
+use ggez::graphics::{DrawMode, Point2};
 
 struct MainState {
     pos_x: f32,
@@ -19,7 +18,7 @@ impl MainState {
 }
 
 impl event::EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context, _dt: Duration) -> GameResult<()> {
+    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         self.pos_x = self.pos_x % 800.0 + 1.0;
         Ok(())
     }
@@ -29,12 +28,9 @@ impl event::EventHandler for MainState {
         graphics::circle(
             ctx,
             DrawMode::Fill,
-            Point {
-                x: self.pos_x,
-                y: 380.0,
-            },
+            Point2::new(self.pos_x, 380.0),
             100.0,
-            32,
+            32.,
         )?;
         graphics::present(ctx);
         Ok(())

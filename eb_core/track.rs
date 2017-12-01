@@ -7,14 +7,12 @@ use ggez::graphics::Rect;
 
 
 type GID = u32;
-pub struct Image;
 pub struct Object;
 
 pub struct Track {
     tile_width: u32,
     tile_height: u32,
     tile_layer: TileLayerData,
-    image: Image,
 }
 
 
@@ -58,8 +56,23 @@ impl Track {
             tile_width,
             tile_height,
             tile_layer: layer,
-            image: Image, // may need to box this, depending on the size
         }
+    }
+
+    pub fn rects(&self) -> Vec<Option<Rect>> {
+        self.tile_layer.data.iter().map(|idx| {
+            match *idx {
+                0 => None,
+                _ => {
+                    Some(tile_idx_to_rect(
+                    *idx,
+                    self.tile_width,
+                    self.tile_height,
+                    self.tile_layer.width,
+                    self.tile_layer.height))
+                }
+            }
+        }).collect()
     }
 }
 

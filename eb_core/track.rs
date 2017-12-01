@@ -64,6 +64,11 @@ impl Track {
 }
 
 
+/// Eh, this will position a rect using the bottom left corner instead of the center).
+fn place_rect(x: f32, y: f32, w: f32, h: f32) -> Rect {
+    Rect::new(x + (w / 2.), y + (h / 2.), w, h)
+}
+
 
 /// Converts a tile index into a `Rect` region of a tileset image.
 ///
@@ -84,13 +89,9 @@ fn tile_idx_to_rect(
         row < tileset_height,
         "gid bounds check failed, row too large."
     );
-
-    let half_width = (tile_width as f32) / 2.;
-    let half_height = (tile_height as f32) / 2.;
-
-    Rect::new(
-        ((col * tile_width) as f32) + half_width,
-        (((tileset_height - row - 1) * tile_height) as f32) + half_height,
+    place_rect(
+        (col * tile_width) as f32,
+        ((tileset_height - row - 1) * tile_height) as f32,
         tile_width as f32,
         tile_height as f32,
     )
@@ -102,10 +103,47 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_place_rect_0_0() {
+        let r = place_rect(0., 0., 16., 16.);
+        assert_eq!(r.top(), 16.);
+        assert_eq!(r.bottom(), 0.);
+        assert_eq!(r.left(), 0.);
+        assert_eq!(r.right(), 16.);
+    }
+
+
+    #[test]
+    fn test_place_rect_neg_10_0() {
+        let r = place_rect(-10., 0., 16., 16.);
+        assert_eq!(r.top(), 16.);
+        assert_eq!(r.bottom(), 0.);
+        assert_eq!(r.left(), -10.);
+        assert_eq!(r.right(), 6.);
+    }
+
+    #[test]
+    fn test_place_rect_10_0() {
+        let r = place_rect(10., 0., 16., 16.);
+        assert_eq!(r.top(), 16.);
+        assert_eq!(r.bottom(), 0.);
+        assert_eq!(r.left(), 10.);
+        assert_eq!(r.right(), 26.);
+    }
+
+    #[test]
+    fn test_place_rect_0_10() {
+        let r = place_rect(0., 10., 16., 16.);
+        assert_eq!(r.top(), 26.);
+        assert_eq!(r.bottom(), 10.);
+        assert_eq!(r.left(), 00.);
+        assert_eq!(r.right(), 16.);
+    }
+
+    #[test]
     fn test_gid_0_to_rect() {
         assert_eq!(
             tile_idx_to_rect(0, 16, 16, 3, 3),
-            Rect::new_i32(8, 40, 16, 16)
+            place_rect(0., 32., 16., 16.)
         );
     }
 
@@ -113,7 +151,7 @@ mod tests {
     fn test_gid_1_to_rect() {
         assert_eq!(
             tile_idx_to_rect(1, 16, 16, 3, 3),
-            Rect::new_i32(24, 40, 16, 16)
+            place_rect(16., 32., 16., 16.)
         );
     }
 
@@ -121,7 +159,7 @@ mod tests {
     fn test_gid_2_to_rect() {
         assert_eq!(
             tile_idx_to_rect(2, 16, 16, 3, 3),
-            Rect::new_i32(40, 40, 16, 16)
+            place_rect(32., 32., 16., 16.)
         );
     }
 
@@ -129,7 +167,7 @@ mod tests {
     fn test_gid_3_to_rect() {
         assert_eq!(
             tile_idx_to_rect(3, 16, 16, 3, 3),
-            Rect::new_i32(8, 24, 16, 16)
+            place_rect(0., 16., 16., 16.)
         );
     }
 
@@ -137,7 +175,7 @@ mod tests {
     fn test_gid_4_to_rect() {
         assert_eq!(
             tile_idx_to_rect(4, 16, 16, 3, 3),
-            Rect::new_i32(24, 24, 16, 16)
+            place_rect(16., 16., 16., 16.)
         );
     }
 
@@ -145,7 +183,7 @@ mod tests {
     fn test_gid_5_to_rect() {
         assert_eq!(
             tile_idx_to_rect(5, 16, 16, 3, 3),
-            Rect::new_i32(40, 24, 16, 16)
+            place_rect(32., 16., 16., 16.)
         );
     }
 
@@ -153,7 +191,7 @@ mod tests {
     fn test_gid_6_to_rect() {
         assert_eq!(
             tile_idx_to_rect(6, 16, 16, 3, 3),
-            Rect::new_i32(8, 8, 16, 16)
+            place_rect(0., 0., 16., 16.)
         );
     }
 
@@ -161,7 +199,7 @@ mod tests {
     fn test_gid_7_to_rect() {
         assert_eq!(
             tile_idx_to_rect(7, 16, 16, 3, 3),
-            Rect::new_i32(24, 8, 16, 16)
+            place_rect(16., 0., 16., 16.)
         );
     }
 
@@ -169,7 +207,7 @@ mod tests {
     fn test_gid_8_to_rect() {
         assert_eq!(
             tile_idx_to_rect(8, 16, 16, 3, 3),
-            Rect::new_i32(40, 8, 16, 16)
+            place_rect(32., 0., 16., 16.)
         );
     }
 

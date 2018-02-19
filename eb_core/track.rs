@@ -1,5 +1,4 @@
 
-use std::fs::File;
 use std::path::Path;
 use serde_json;
 use serde_json::Value;
@@ -10,9 +9,9 @@ type GID = u32;
 pub struct Object;
 
 pub struct Track {
-    tile_width: u32,
-    tile_height: u32,
-    tile_layer: TileLayerData,
+    pub tile_width: u32,
+    pub tile_height: u32,
+    pub tile_layer: TileLayerData,
 }
 
 
@@ -33,24 +32,20 @@ pub struct ObjectLayerData {
 }
 
 
-fn divmod(n: u32, div: u32) -> (u32, u32) {
+pub fn divmod(n: u32, div: u32) -> (u32, u32) {
     (n / div, n % div)
 }
 
 
 impl Track {
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Track {
 
-        let reader = File::open(path).expect("read file");
-
-        let obj: Value = serde_json::from_reader(reader).expect("parse json");
+    pub fn from_str(s: &str) -> Track {
+        let obj: Value = serde_json::from_str(s).expect("parse json");
 
         let tile_width = obj["tilewidth"].as_u64().unwrap() as u32;
         let tile_height = obj["tileheight"].as_u64().unwrap() as u32;
 
         let layer: TileLayerData = serde_json::from_value(obj["layers"][0].clone()).unwrap();
-
-        println!("{:?}: {}", layer, ::std::mem::size_of::<TileLayerData>());
 
         Track {
             tile_width,
@@ -59,17 +54,16 @@ impl Track {
         }
     }
 
-    pub fn rects(&self) -> Vec<Option<Rect>> {
-        self.tile_layer.data.iter().map(|idx| {
-            match *idx {
+    pub fn rects(&self, image_size: (u32, u32)) -> Vec<Option<Rect>> {
+        self.tile_layer.data.iter().map(|gid| {
+            match *gid {
                 0 => None,
-                _ => {
+                id => {
                     Some(tile_idx_to_rect(
-                    *idx,
+                    id,
+                    image_size,
                     self.tile_width,
-                    self.tile_height,
-                    self.tile_layer.width,
-                    self.tile_layer.height))
+                    self.tile_height))
                 }
             }
         }).collect()
@@ -77,159 +71,65 @@ impl Track {
 }
 
 
-/// Eh, this will position a rect using the bottom left corner
-/// instead of the center).
-fn place_rect(x: f32, y: f32, w: f32, h: f32) -> Rect {
-    Rect::new(x + (w / 2.), y + (h / 2.), w, h)
-}
-
 
 /// Converts a tile index into a `Rect` region of a tileset image.
 ///
-/// The `tileset_width` and `tileset_height` params are the number of cells (not
+/// The `image_width` and `image_height` params are the number of cells (not
 /// pixels) that make up the entire image.
 /// The image size is therefore:
-///   `(tileset_width * tile_width) * (tileset_height * tile_height)`
+///   `(image_width * tile_width) * (image_height * tile_height)`
 /// Panics when gid is out of bounds.
-fn tile_idx_to_rect(
-    idx: u32,
+pub fn tile_idx_to_rect(
+    gid: u32,
+    img_size: (u32, u32),
     tile_width: u32,
     tile_height: u32,
-    tileset_width: u32,
-    tileset_height: u32,
 ) -> Rect {
-    let (row, col) = divmod(idx, tileset_width);
-    assert!(
-        row < tileset_height,
-        "gid bounds check failed, row too large."
+
+    let img_width = img_size.0 as f32;
+    let img_height = img_size.1 as f32;
+
+    let cols = img_width / tile_width as f32;
+    let rows = img_height / tile_height as f32;
+
+    // FIXME: assumes a start GID=1, but really it could be a higher starting number.
+    let (row, col) = divmod(gid - 1, cols as u32);
+
+    debug_assert!(
+        row < rows as u32,
+        "gid bounds check failed, {} >= {}.",
+        row,
+        rows
     );
-    place_rect(
-        (col * tile_width) as f32,
-        ((tileset_height - row - 1) * tile_height) as f32,
-        tile_width as f32,
-        tile_height as f32,
-    )
+
+    let x = col as f32 / cols as f32;
+    let y = row as f32 / rows as f32;
+
+    let w = tile_width as f32 / img_width;
+    let h = tile_height as f32 / img_height;
+
+    println!("grid size={:?}, col/row={:?}, uv pos={:?}, uv size={:?}, tile size={:?}",
+             (cols, rows),
+             (col, row),
+             (x, y),
+             (w, h),
+             (tile_width, tile_height),
+    );
+
+    // with all the dimensions converted to UV space, they should
+    // all be between 0 and 1.
+    debug_assert!(x <= 1. && x >= 0.);
+    debug_assert!(y <= 1. && y >= 0.);
+    debug_assert!(w <= 1. && w >= 0.);
+    debug_assert!(h <= 1. && h >= 0.);
+
+    Rect::new(x, y, w, h)
 }
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_place_rect_0_0() {
-        let r = place_rect(0., 0., 16., 16.);
-        assert_eq!(r.top(), 16.);
-        assert_eq!(r.bottom(), 0.);
-        assert_eq!(r.left(), 0.);
-        assert_eq!(r.right(), 16.);
-    }
-
-
-    #[test]
-    fn test_place_rect_neg_10_0() {
-        let r = place_rect(-10., 0., 16., 16.);
-        assert_eq!(r.top(), 16.);
-        assert_eq!(r.bottom(), 0.);
-        assert_eq!(r.left(), -10.);
-        assert_eq!(r.right(), 6.);
-    }
-
-    #[test]
-    fn test_place_rect_10_0() {
-        let r = place_rect(10., 0., 16., 16.);
-        assert_eq!(r.top(), 16.);
-        assert_eq!(r.bottom(), 0.);
-        assert_eq!(r.left(), 10.);
-        assert_eq!(r.right(), 26.);
-    }
-
-    #[test]
-    fn test_place_rect_0_10() {
-        let r = place_rect(0., 10., 16., 16.);
-        assert_eq!(r.top(), 26.);
-        assert_eq!(r.bottom(), 10.);
-        assert_eq!(r.left(), 00.);
-        assert_eq!(r.right(), 16.);
-    }
-
-    #[test]
-    fn test_gid_0_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(0, 16, 16, 3, 3),
-            place_rect(0., 32., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_1_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(1, 16, 16, 3, 3),
-            place_rect(16., 32., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_2_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(2, 16, 16, 3, 3),
-            place_rect(32., 32., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_3_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(3, 16, 16, 3, 3),
-            place_rect(0., 16., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_4_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(4, 16, 16, 3, 3),
-            place_rect(16., 16., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_5_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(5, 16, 16, 3, 3),
-            place_rect(32., 16., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_6_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(6, 16, 16, 3, 3),
-            place_rect(0., 0., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_7_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(7, 16, 16, 3, 3),
-            place_rect(16., 0., 16., 16.)
-        );
-    }
-
-    #[test]
-    fn test_gid_8_to_rect() {
-        assert_eq!(
-            tile_idx_to_rect(8, 16, 16, 3, 3),
-            place_rect(32., 0., 16., 16.)
-        );
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_out_of_bounds_gid() {
-        tile_idx_to_rect(9, 16, 16, 3, 3);
-    }
 
     // I probably don't need these divmod tests, but it is very late...
     #[test]

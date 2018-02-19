@@ -3,8 +3,11 @@ name = "excertberk"
 version = "0.1.0"
 authors = ["Owen Nelson <onelson@gmail.com>"]
 
+[profile.dev]
+opt-level = 2
+
 [dependencies]
-ggez = { git = "https://github.com/ggez/ggez.git" }
+ggez = "0.4.0"
 specs = "0.10.*"
 serde = "1.0.*"
 serde_derive = "1.0.*"

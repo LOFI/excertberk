@@ -8,62 +8,58 @@ use std::io::Read;
 use ggez::conf;
 use ggez::{Context, GameResult};
 use ggez::event;
-use ggez::graphics;
+use ggez::graphics::{self, Rect, Point2};
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::filesystem;
 use ggez::timer;
-use eb_core::track::Track;
-
 
 struct MainState {
-    spritebatch: SpriteBatch,
+    spritebatch: graphics::spritebatch::SpriteBatch
 }
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
 
-        let mut reader: filesystem::File = ctx.filesystem.open("/test-track-01.json")?;
+        let image = graphics::Image::new(ctx, "/track-parts.png").unwrap();
+        let mut spritebatch = graphics::spritebatch::SpriteBatch::new(image);
+//        1.1517857, 0, 0.008928572, 0.125
+        let p1 = graphics::DrawParam {
+            src: Rect::new(1.1517857, 0., 0.008928572, 0.125),
+            dest: Point2::new(0. , 0.),
 
-        let data ={
-            let mut s = String::new();
-            let _ = reader.read_to_string(&mut s).expect("read tilemap data file");
-            s
+            ..Default::default()
         };
 
-        let track = Track::from_str(&data);
+        let p2 = graphics::DrawParam {
+            src: Rect::new(0.25, 0., 0.25, 1.0),
+            dest: Point2::new(16. , 0.),
 
-        let image = graphics::Image::new(ctx, "/track-parts.png").unwrap();
-        let rects = track.rects((image.width(), image.height()));
-        let mut batch = graphics::spritebatch::SpriteBatch::new(image);
-        println!("tile count: {}", rects.len());
+            ..Default::default()
+        };
 
-        for (i, maybe_rect) in rects.iter().enumerate() {
+        let p3 = graphics::DrawParam {
+            src: Rect::new(0.5, 0., 0.25, 1.0),
+            dest: Point2::new(32. , 0.),
 
-            // when the rect is None, it's an empty tile (GID=0)
-            if let &Some(uv) = maybe_rect {
-//                println!("{}, {}, {}, {}", uv.left(), uv.top(), uv.w, uv.h);
-                let (row, col) = eb_core::track::divmod(i as u32, track.tile_layer.width);
+            ..Default::default()
+        };
 
-                let dest = {
-                    let x = col as f32 * track.tile_width as f32;
-                    let y = row as f32 * track.tile_height as f32;
-//                    println!("{}, {}", x, y);
-                    graphics::Point2::new(x, y)
-                };
+        let p4 = graphics::DrawParam {
+            src: Rect::new(0.75, 0., 0.25, 1.0),
+            dest: Point2::new(48. , 0.),
 
-                let p = graphics::DrawParam {
-                    src: uv,
-                    dest,
-                    ..Default::default()
-                };
+            ..Default::default()
+        };
 
-                batch.add(p);
-            }
-        }
+        spritebatch.add(p1);
+//        spritebatch.add(p2);
+//        spritebatch.add(p3);
+//        spritebatch.add(p4);
 
         let s = MainState {
-            spritebatch: batch
+            spritebatch
         };
+
         Ok(s)
     }
 }
@@ -71,7 +67,6 @@ impl MainState {
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-
         if timer::get_ticks(ctx) % 100 == 0 {
             println!("Delta frame time: {:?} ", timer::get_delta(ctx));
             println!("Average FPS: {}", timer::get_fps(ctx));
@@ -81,21 +76,21 @@ impl event::EventHandler for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
-        let _time = (timer::duration_to_f64(timer::get_time_since_start(ctx)) * 1000.0) as f32;
         graphics::draw(ctx, &self.spritebatch, graphics::Point2::new(0., 0.), 0.)?;
         graphics::present(ctx);
         Ok(())
     }
 }
 
+
 pub fn main() {
     let c = conf::Conf {
         window_mode: conf::WindowMode {
-            width: 72 * 16,
-            height: 16 * 16,
+            width: 640,
+            height: 480,
             ..Default::default()
         },
-        window_setup: conf::WindowSetup { title: "excertberk".into(), ..Default::default() },
+        window_setup: conf::WindowSetup { title: "numbers".into(), ..Default::default() },
         ..Default::default()
     };
 

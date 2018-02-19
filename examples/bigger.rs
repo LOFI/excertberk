@@ -22,7 +22,9 @@ struct MainState {
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
 
-        let mut reader: filesystem::File = ctx.filesystem.open("/test-track-01.json")?;
+//        let mut reader: filesystem::File = ctx.filesystem.open("/bigger-numbers.json")?;
+        let mut reader: filesystem::File = ctx.filesystem.open("/bigger-numbers.json")?;
+
 
         let data ={
             let mut s = String::new();
@@ -32,7 +34,8 @@ impl MainState {
 
         let track = Track::from_str(&data);
 
-        let image = graphics::Image::new(ctx, "/track-parts.png").unwrap();
+//        let image = graphics::Image::new(ctx, "/numbers.png").unwrap();
+        let image = graphics::Image::new(ctx, "/numbers.png").unwrap();
         let rects = track.rects((image.width(), image.height()));
         let mut batch = graphics::spritebatch::SpriteBatch::new(image);
         println!("tile count: {}", rects.len());
@@ -72,12 +75,13 @@ impl MainState {
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
 
-        if timer::get_ticks(ctx) % 100 == 0 {
-            println!("Delta frame time: {:?} ", timer::get_delta(ctx));
-            println!("Average FPS: {}", timer::get_fps(ctx));
-        }
+//        if timer::get_ticks(ctx) % 100 == 0 {
+//            println!("Delta frame time: {:?} ", timer::get_delta(ctx));
+//            println!("Average FPS: {}", timer::get_fps(ctx));
+//        }
         Ok(())
     }
+
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
@@ -91,11 +95,11 @@ impl event::EventHandler for MainState {
 pub fn main() {
     let c = conf::Conf {
         window_mode: conf::WindowMode {
-            width: 72 * 16,
-            height: 16 * 16,
+            width: 640,
+            height: 480,
             ..Default::default()
         },
-        window_setup: conf::WindowSetup { title: "excertberk".into(), ..Default::default() },
+        window_setup: conf::WindowSetup { title: "number grid".into(), ..Default::default() },
         ..Default::default()
     };
 

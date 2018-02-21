@@ -1,9 +1,9 @@
-extern crate specs;
+extern crate ggez;
 extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
-extern crate ggez;
+extern crate serde_json;
+extern crate specs;
 
 pub use specs::{DispatcherBuilder, World};
 

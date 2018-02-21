@@ -1,8 +1,7 @@
-
 extern crate ggez;
 use ggez::conf;
 use ggez::event;
-use ggez::{GameResult, Context};
+use ggez::{Context, GameResult};
 use ggez::graphics;
 use ggez::graphics::{DrawMode, Point2};
 

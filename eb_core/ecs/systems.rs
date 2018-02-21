@@ -1,10 +1,8 @@
-use specs::{System, Entities, ReadStorage, WriteStorage, Join, Fetch};
+use specs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
 use super::components::*;
-use types::{Track, Tile};
-
+use types::{Tile, Track};
 
 pub struct ComputerRiderThink;
-
 
 /// I guess this will return a 2d vec, one tile slice per lane, using some
 /// window to limit the tile count.
@@ -13,7 +11,11 @@ fn upcoming_tiles(track: &Track, from: f32, to: f32) -> &[Vec<Tile>] {
 }
 
 impl<'a> System<'a> for ComputerRiderThink {
-    type SystemData = (WriteStorage<'a, Bike>, ReadStorage<'a, ComputerRider>, Fetch<'a, Track>);
+    type SystemData = (
+        WriteStorage<'a, Bike>,
+        ReadStorage<'a, ComputerRider>,
+        Fetch<'a, Track>,
+    );
 
     fn run(&mut self, (mut bikes, brains, track): Self::SystemData) {
         // FIXME: need access to the other bike positions, and terrain info.
@@ -31,7 +33,5 @@ impl<'a> System<'a> for ComputerRiderThink {
                 _ => (),
             };
         }
-
-
     }
 }

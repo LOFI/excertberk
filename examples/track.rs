@@ -46,13 +46,11 @@ impl MainState {
         for (i, maybe_rect) in rects.iter().enumerate() {
             // when the rect is None, it's an empty tile (GID=0)
             if let &Some(uv) = maybe_rect {
-                //                println!("{}, {}, {}, {}", uv.left(), uv.top(), uv.w, uv.h);
                 let (row, col) = eb_core::track::divmod(i as u32, track.tile_layer.width);
 
                 let dest = {
                     let x = col as f32 * track.tile_width as f32;
                     let y = row as f32 * track.tile_height as f32;
-                    //                    println!("{}, {}", x, y);
                     graphics::Point2::new(x, y)
                 };
 

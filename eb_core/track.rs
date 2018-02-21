@@ -50,12 +50,12 @@ impl TrackData {
         let tile_width = obj["tilewidth"].as_u64().unwrap() as u32;
         let tile_height = obj["tileheight"].as_u64().unwrap() as u32;
 
-        let layer: TileLayerData = serde_json::from_value(obj["layers"][0].clone()).unwrap();
+        let tile_layer: TileLayerData = serde_json::from_value(obj["layers"][0].clone()).unwrap();
 
         TrackData {
             tile_width,
             tile_height,
-            tile_layer: layer,
+            tile_layer,
             image_size,
         }
     }
@@ -104,25 +104,15 @@ pub fn tile_idx_to_uv_rect(
 
     let x = col as f32 / cols;
     let y = row as f32 / rows;
-
     let w = tile_width / img_width;
     let h = tile_height / img_height;
 
-    //    println!(
-    //        "grid size={:?}, col/row={:?}, uv pos={:?}, uv size={:?}, tile size={:?}",
-    //        (cols, rows),
-    //        (col, row),
-    //        (x, y),
-    //        (w, h),
-    //        (tile_width, tile_height),
-    //    );
-
     // with all the dimensions converted to UV space, they should
     // all be between 0 and 1.
-    debug_assert!(x <= 1. && x >= 0.);
-    debug_assert!(y <= 1. && y >= 0.);
-    debug_assert!(w <= 1. && w >= 0.);
-    debug_assert!(h <= 1. && h >= 0.);
+    debug_assert!(x >= 0. && x <= 1.);
+    debug_assert!(y >= 0. && y <= 1.);
+    debug_assert!(w >= 0. && w <= 1.);
+    debug_assert!(h >= 0. && h <= 1.);
 
     Rect::new(x, y, w, h)
 }

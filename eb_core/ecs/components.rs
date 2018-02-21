@@ -11,14 +11,12 @@ impl Component for ComputerRider {
     type Storage = HashMapStorage<Self>;
 }
 
-
 /// This is a human/input controlled player.
 pub struct HumanRider;
 
 impl Component for HumanRider {
     type Storage = HashMapStorage<Self>;
 }
-
 
 #[derive(Clone, Debug)]
 pub enum RiderState {

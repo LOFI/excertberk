@@ -2,11 +2,10 @@ extern crate eb_core;
 
 use eb_core::ecs::components::*;
 use eb_core::ecs::systems::*;
-use eb_core::{World, DispatcherBuilder};
-use eb_core::types::{Track, DeltaTime};
+use eb_core::{DispatcherBuilder, World};
+use eb_core::types::{DeltaTime, Track};
 
 fn main() {
-
     let mut world = World::new();
     world.register::<Bike>();
     world.register::<ComputerRider>();
@@ -23,7 +22,9 @@ fn main() {
                 active_state: RiderState::Riding,
                 angle: 0.0,
             })
-            .with(ComputerRider { view_distance: 10.0 })
+            .with(ComputerRider {
+                view_distance: 10.0,
+            })
             .build();
     }
 

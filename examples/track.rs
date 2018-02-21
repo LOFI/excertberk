@@ -12,8 +12,7 @@ use ggez::graphics;
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::filesystem;
 use ggez::timer;
-use eb_core::track::Track;
-
+use eb_core::track::{ImageSize, TrackData};
 
 struct MainState {
     spritebatch: SpriteBatch,
@@ -21,33 +20,39 @@ struct MainState {
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
-
         let mut reader: filesystem::File = ctx.filesystem.open("/test-track-01.json")?;
 
-        let data ={
+        let data = {
             let mut s = String::new();
-            let _ = reader.read_to_string(&mut s).expect("read tilemap data file");
+            let _ = reader
+                .read_to_string(&mut s)
+                .expect("read tilemap data file");
             s
         };
 
-        let track = Track::from_str(&data);
-
         let image = graphics::Image::new(ctx, "/track-parts.png").unwrap();
-        let rects = track.rects((image.width(), image.height()));
+        let track = TrackData::from_str(
+            &data,
+            ImageSize {
+                width: image.width(),
+                height: image.height(),
+            },
+        );
+
+        let rects = track.uv_rects();
         let mut batch = graphics::spritebatch::SpriteBatch::new(image);
         println!("tile count: {}", rects.len());
 
         for (i, maybe_rect) in rects.iter().enumerate() {
-
             // when the rect is None, it's an empty tile (GID=0)
             if let &Some(uv) = maybe_rect {
-//                println!("{}, {}, {}, {}", uv.left(), uv.top(), uv.w, uv.h);
+                //                println!("{}, {}, {}, {}", uv.left(), uv.top(), uv.w, uv.h);
                 let (row, col) = eb_core::track::divmod(i as u32, track.tile_layer.width);
 
                 let dest = {
                     let x = col as f32 * track.tile_width as f32;
                     let y = row as f32 * track.tile_height as f32;
-//                    println!("{}, {}", x, y);
+                    //                    println!("{}, {}", x, y);
                     graphics::Point2::new(x, y)
                 };
 
@@ -61,17 +66,13 @@ impl MainState {
             }
         }
 
-        let s = MainState {
-            spritebatch: batch
-        };
+        let s = MainState { spritebatch: batch };
         Ok(s)
     }
 }
 
-
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-
         if timer::get_ticks(ctx) % 100 == 0 {
             println!("Delta frame time: {:?} ", timer::get_delta(ctx));
             println!("Average FPS: {}", timer::get_fps(ctx));
@@ -95,7 +96,10 @@ pub fn main() {
             height: 16 * 16,
             ..Default::default()
         },
-        window_setup: conf::WindowSetup { title: "excertberk".into(), ..Default::default() },
+        window_setup: conf::WindowSetup {
+            title: "excertberk".into(),
+            ..Default::default()
+        },
         ..Default::default()
     };
 
